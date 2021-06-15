@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/pulsar-io-clickhouse/pulsar-io-clickhouse.iml" filepath="$PROJECT_DIR$/pulsar-io-clickhouse/pulsar-io-clickhouse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pulsar-io-debezium/pulsar-io-debezium.iml" filepath="$PROJECT_DIR$/pulsar-io-debezium/pulsar-io-debezium.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pulsar-io-function/pulsar-io-function.iml" filepath="$PROJECT_DIR$/pulsar-io-function/pulsar-io-function.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/pulsar-io-warehouse.iml" filepath="$PROJECT_DIR$/.idea/pulsar-io-warehouse.iml" />
+    </modules>
+  </component>
+</project>
