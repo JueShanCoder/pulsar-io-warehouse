@@ -25,8 +25,6 @@ public class ConvertFunction implements Function<byte[],byte[]> {
                 throw new IllegalArgumentException(" Required parameters are not set... Please check the startup script !!! ");
             }
             JsonNode jsonNode = convert2JsonNode(bytes);
-            // TODO will delete
-            log.info("====will delete, the jsonNode is {}",objectMapper.writeValueAsString(jsonNode));
             Map<String, String> properties = new HashMap<>();
             byte[] sinkBytes = convert2Byte(jsonNode,properties);
             if (sinkBytes != null) {

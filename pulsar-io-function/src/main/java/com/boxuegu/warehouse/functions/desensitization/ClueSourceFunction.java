@@ -1,6 +1,5 @@
 package com.boxuegu.warehouse.functions.desensitization;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.functions.api.Context;
@@ -14,6 +13,6 @@ public class ClueSourceFunction implements Function<byte[],Void> {
     @Override
     public Void process(byte[] bytes, Context context) throws Exception {
 
-
+        return null;
     }
 }
