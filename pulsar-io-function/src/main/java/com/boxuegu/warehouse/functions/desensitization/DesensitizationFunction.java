@@ -22,29 +22,30 @@ public class DesensitizationFunction implements Function<byte[],Void> {
     public Void process(byte[] input, Context context) {
         try {
             DesensitizationConfig desensitizationConfig = DesensitizationConfig.load(context.getUserConfigMap());
-            if (desensitizationConfig.getDesensitizationTopicName() == null || desensitizationConfig.getTargetTableName() == null
-                    || desensitizationConfig.getDesensitizationField() == null){
+            if (desensitizationConfig.getDesensitizationTopicName() == null || desensitizationConfig.getDesensitizationCustomize() == null){
                 throw new IllegalArgumentException(" Required parameters are not set... Please check the startup script !!! ");
             }
 
             Map<String, String> properties = context.getCurrentRecord().getProperties();
-            Boolean isMatch = matchTable(properties, desensitizationConfig.getTargetTableName());
-            if (isMatch) {
-                // Perform Desensitization
-                JsonNode jsonNode = convert2JsonNode(input);
-                for (String str: desensitizationConfig.getDesensitizationField().split(",")) {
-                    String[] split = str.split(":");
-                    desensitization(jsonNode,split[0],split[1]);
+
+            String[] desensitizationCustomize = desensitizationConfig.getDesensitizationCustomize().split(",");
+            for (String customizeStr:desensitizationCustomize) {
+                String[] single = customizeStr.split(":");
+                Boolean isMatch = matchTable(properties, single[0]);
+                if (isMatch) {
+                    // Perform Desensitization
+                    JsonNode jsonNode = convert2JsonNode(input);
+                    desensitization(jsonNode,single[1],single[2]);
+                    context.newOutputMessage(desensitizationConfig.getDesensitizationTopicName(), Schema.BYTES)
+                            .value(objectMapper.writeValueAsString(jsonNode).getBytes(StandardCharsets.UTF_8))
+                            .properties(properties)
+                            .send();
+                } else {
+                    context.newOutputMessage(desensitizationConfig.getDesensitizationTopicName(), Schema.BYTES)
+                            .value(input)
+                            .properties(properties)
+                            .send();
                 }
-                context.newOutputMessage(desensitizationConfig.getDesensitizationTopicName(), Schema.BYTES)
-                        .value(objectMapper.writeValueAsString(jsonNode).getBytes(StandardCharsets.UTF_8))
-                        .properties(properties)
-                        .send();
-            } else {
-                context.newOutputMessage(desensitizationConfig.getDesensitizationTopicName(), Schema.BYTES)
-                        .value(input)
-                        .properties(properties)
-                        .send();
             }
             return null;
         } catch (Exception e) {

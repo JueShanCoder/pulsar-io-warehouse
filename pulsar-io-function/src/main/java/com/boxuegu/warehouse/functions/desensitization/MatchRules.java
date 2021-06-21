@@ -22,8 +22,6 @@ public class MatchRules {
     private static final String BANK_ID = "BANK_ID";
     private static final String PASSWORD = "PASSWORD";
 
-    static final ObjectMapper objectMapper = new ObjectMapper();
-
     public static Boolean matchTable(Map<String,String> properties, String tableName){
         String target = properties.get("TARGET");
         return target.contains(tableName);

@@ -27,17 +27,9 @@ public class DesensitizationConfig {
             required = true,
             defaultValue = "",
             sensitive = true,
-            help = " target table name eg 'database name.table name' "
+            help = " desensitization customize eg: 'tableName:field:type,tableName1:field1:type1' "
     )
-    private String targetTableName;
-
-    @FieldDoc(
-            required = true,
-            defaultValue = "",
-            sensitive = true,
-            help = " desensitization field eg: 'field1:desensitization type1,field2:desensitization type2' "
-    )
-    private String desensitizationField;
+    private String desensitizationCustomize;
 
     public static DesensitizationConfig load(Map<String,Object> map) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
