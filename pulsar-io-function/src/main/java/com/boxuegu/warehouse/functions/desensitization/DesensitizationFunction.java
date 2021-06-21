@@ -40,6 +40,11 @@ public class DesensitizationFunction implements Function<byte[],Void> {
                         .value(objectMapper.writeValueAsString(jsonNode).getBytes(StandardCharsets.UTF_8))
                         .properties(properties)
                         .send();
+            } else {
+                context.newOutputMessage(desensitizationConfig.getDesensitizationTopicName(), Schema.BYTES)
+                        .value(input)
+                        .properties(properties)
+                        .send();
             }
             return null;
         } catch (Exception e) {
