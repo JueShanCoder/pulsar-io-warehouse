@@ -22,6 +22,14 @@ public class ConvertConfig {
     )
     private String convertTopicName;
 
+    @FieldDoc(
+            required = true,
+            defaultValue = "",
+            sensitive = true,
+            help = " schema mapping eg: 'tableNameA:tableNameB,tableNameC:tableNameD' "
+    )
+    private String schemaMapping;
+
     public static ConvertConfig load(Map<String,Object> map) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.readValue(objectMapper.writeValueAsBytes(map), ConvertConfig.class);

@@ -14,26 +14,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class ConvertFunction implements Function<byte[],byte[]> {
+public class ConvertFunction implements Function<byte[], byte[]> {
 
     final ObjectMapper objectMapper = new ObjectMapper();
+
+    private String schemaMapping;
+
     @Override
     public byte[] process(byte[] bytes, Context context) {
         try {
             ConvertConfig convertConfig = ConvertConfig.load(context.getUserConfigMap());
-            if (convertConfig.getConvertTopicName() == null){
+            if (convertConfig.getConvertTopicName() == null || convertConfig.getSchemaMapping() == null) {
                 throw new IllegalArgumentException(" Required parameters are not set... Please check the startup script !!! ");
             }
+            schemaMapping = convertConfig.getSchemaMapping();
             JsonNode jsonNode = convert2JsonNode(bytes);
             Map<String, String> properties = new HashMap<>();
-            byte[] sinkBytes = convert2Byte(jsonNode,properties);
+            byte[] sinkBytes = convert2Byte(jsonNode, properties);
             if (sinkBytes != null) {
-                log.info("send to convert topic, topic name is {}",convertConfig.getConvertTopicName());
+                log.info("send to convert topic, topic name is {}", convertConfig.getConvertTopicName());
                 context.newOutputMessage(convertConfig.getConvertTopicName(), Schema.BYTES).value(sinkBytes).properties(properties).send();
             } else
                 log.info("[ConvertFunction sinkBytes is null, maybe 'op' is wrong ... ]");
-        } catch (Exception e){
-            log.error("[ConvertFunction got exception ..]",e);
+        } catch (Exception e) {
+            log.error("[ConvertFunction got exception ..]", e);
             throw new RuntimeException(e);
         }
         return null;
@@ -47,29 +51,42 @@ public class ConvertFunction implements Function<byte[],byte[]> {
         String op = jsonNode.findValue("op").asText();
         String databaseName = findDataBaseName(jsonNode);
         String tableName = findTableName(jsonNode);
-        properties.put("TARGET",databaseName + "." + databaseName + "." + tableName);
+        properties.put("TARGET", databaseName + "." + databaseName + "." + tableName);
         properties.put("SQLMODE", "INSERT_IGNORE_INVALID");
-        if (op.equalsIgnoreCase("d")){
+        if (op.equalsIgnoreCase("d")) {
             // delete operator
-            properties.put("ACTION","DELETE");
+            properties.put("ACTION", "DELETE");
             return objectMapper.writeValueAsString(jsonNode.get("before")).getBytes(StandardCharsets.UTF_8);
-        } else if (op.equalsIgnoreCase("u")){
+        } else if (op.equalsIgnoreCase("u")) {
             // update operator
-            properties.put("ACTION","UPDATE");
+            properties.put("ACTION", "UPDATE");
             return objectMapper.writeValueAsString(jsonNode.get("after")).getBytes(StandardCharsets.UTF_8);
-        } else if (op.equalsIgnoreCase("c")){
+        } else if (op.equalsIgnoreCase("c")) {
             // insert operator
-            properties.put("ACTION","INSERT");
+            properties.put("ACTION", "INSERT");
             return objectMapper.writeValueAsString(jsonNode.get("after")).getBytes(StandardCharsets.UTF_8);
         }
         return null;
     }
 
-    private String findDataBaseName(JsonNode jsonNode){
-        return jsonNode.get("source").findValue("db").asText();
+    private String findDataBaseName(JsonNode jsonNode) {
+        String sourceDatabaseName = jsonNode.get("source").findValue("db").asText();
+        return schemaMatch(schemaMapping,sourceDatabaseName);
     }
 
-    private String findTableName(JsonNode jsonNode){
+    public static String schemaMatch(String schemaMapping, String sourceDatabaseName){
+        String[] schemaMatch = schemaMapping.split(",");
+        for (String s: schemaMatch) {
+            String[] source = s.split(":");
+            if (source[0].contains(sourceDatabaseName))
+                return source[1];
+            else
+                return sourceDatabaseName;
+        }
+        return sourceDatabaseName;
+    }
+
+    private String findTableName(JsonNode jsonNode) {
         return jsonNode.get("source").findValue("table").asText();
     }
 }
