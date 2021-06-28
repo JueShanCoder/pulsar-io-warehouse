@@ -30,6 +30,7 @@ public class DesensitizationFunction implements Function<byte[], Void> {
             Map<String, String> properties = context.getCurrentRecord().getProperties();
             boolean isSend = false;
             String[] desensitizationCustomize = desensitizationConfig.getDesensitizationCustomize().split(",");
+            // table A,table B
             for (String customizeStr : desensitizationCustomize) {
                 String[] single = customizeStr.split(":");
                 Boolean isMatch = matchTable(properties, single[0]);
