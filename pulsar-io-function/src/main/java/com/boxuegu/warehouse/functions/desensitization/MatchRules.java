@@ -21,21 +21,23 @@ public class MatchRules {
     private static final String BANK_ID = "BANK_ID";
     private static final String PASSWORD = "PASSWORD";
 
-    public static Boolean matchTable(Map<String,String> properties, String tableName){
+    public static Boolean matchTable(Map<String, String> properties, String tableName) {
         String target = properties.get("TARGET");
         return target.contains(tableName);
     }
 
-    public static void desensitization(JsonNode jsonNode,String field, String desensitizationType) throws Exception {
+    public static void desensitization(JsonNode jsonNode, String field, String desensitizationType) throws Exception {
         String target = jsonNode.get(field).asText();
-        String desensitize = desensitizationOperator(target,desensitizationType);
+        if (target != null && target.length() > 0 && !target.equalsIgnoreCase("null")) {
+            String desensitize = desensitizationOperator(target, desensitizationType);
 
-        if (desensitize == null)
-            throw new IllegalArgumentException(" Desensitization type not match ...  Please check the startup script !!! ");
-        ((ObjectNode) jsonNode).put(field, desensitize);
+            if (desensitize == null)
+                throw new IllegalArgumentException(" Desensitization type not match ...  Please check the startup script !!! ");
+            ((ObjectNode) jsonNode).put(field, desensitize);
+        }
     }
 
-    public static String desensitizationOperator(String target,String desensitizationType) {
+    public static String desensitizationOperator(String target, String desensitizationType) {
         if (desensitizationType.equals(STRING))
             return Sensitive.desensitize(target, new TypeToken<@UsccSensitive String>() {
             });
